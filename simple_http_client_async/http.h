@@ -39,17 +39,4 @@ struct http_response {
 header_block_t parse(const std::string& header_block_str);
 std::ostream& operator<<(std::ostream& out, const http_response& resopnse);
 
-// HTTP transaction
-using callback_t =
-    std::function<void(const boost::system::error_code&, const http_response)>;
-
-struct http_transaction_context {
-  explicit http_transaction_context(const callback_t& completion_callback);
-  http_response m_response;
-  std::string m_read_buffer;
-  callback_t m_completion_callback;
-};
-
-using http_transaction_context_ptr = std::shared_ptr<http_transaction_context>;
-
 #endif  // SIMPLE_HTTP_CLIENT_ASYNC_HTTP_H_

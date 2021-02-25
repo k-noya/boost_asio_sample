@@ -68,9 +68,3 @@ std::ostream& operator<<(std::ostream& out, const http_response& response) {
 
   return out;
 }
-
-http_transaction_context::http_transaction_context(
-    const callback_t& completion_callback)
-    : m_response{},
-      m_read_buffer{},
-      m_completion_callback{completion_callback} {}

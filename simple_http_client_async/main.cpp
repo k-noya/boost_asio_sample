@@ -13,8 +13,9 @@
 
 int main() {
   bool is_completed{false};
-  callback_t callback = [&is_completed](const boost::system::error_code& error,
-                                        const http_response response) {
+  http_client::callback_t callback = [&is_completed](
+                                         const boost::system::error_code& error,
+                                         const http_response response) {
     if (error) {
       std::cerr << error;
     } else {

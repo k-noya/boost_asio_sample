@@ -15,6 +15,4 @@ void log(const T& message) {
   std::cout << message << '\n';
 }
 
-// void log(const char* message) { log(std::string{message}); }
-
 #endif  // SIMPLE_HTTP_CLIENT_ASYNC_LOG_H_

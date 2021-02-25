@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <functional>
 #include <future>
-#include <mutex>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -19,37 +19,20 @@ class http_client {
   http_client(const std::string& hostname, const uint16_t port);
   ~http_client();
 
+  using callback_t = std::function<void(const boost::system::error_code&,
+                                        const http_response)>;
+
   void get_async(const std::string& path, const header_block_t& header_block,
                  callback_t callback);
 
  private:
-  uint64_t register_new_transaction(const callback_t& callback);
-  void remove_transaction(uint64_t transaction_id);
-
-  void on_send_request(const boost::system::error_code& error,
-                       std::size_t bytes_transferred,
-                       const uint64_t transaction_id);
-  void on_receive_status_line(const boost::system::error_code& error,
-                              std::size_t bytes_transferred,
-                              const uint64_t transaction_id);
-  void on_receive_response_header(const boost::system::error_code& error,
-                                  std::size_t bytes_transferred,
-                                  const uint64_t transaction_id);
-  void on_receive_response_body(const boost::system::error_code& error,
-                                std::size_t bytes_transferred,
-                                const uint64_t transaction_id);
-
   boost::asio::io_context m_io_context;
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
       m_executor_work_guard;
+  std::future<void> m_future_work;
 
   std::string m_hostname;
-  boost::asio::ip::tcp::socket m_socket;
-  std::future<void> m_work_future;
-
-  std::unordered_map<uint64_t, http_transaction_context_ptr> m_transaction_map;
-  uint64_t m_next_id;
-  std::mutex m_transaction_mutex;
+  std::shared_ptr<boost::asio::ip::tcp::socket> m_socket;
 };
 
 #endif  // SIMPLE_HTTP_CLIENT_ASYNC_HTTP_CLIENT_H_
