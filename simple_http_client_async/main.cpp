@@ -29,7 +29,7 @@ int main() {
   uint16_t port{80u};
   http_client client{hostname, port};
   header_block_t header_block{{"Accept", "application/json"}};
-  client.get_async("/headers", header_block, callback);
+  client.async_get("/headers", header_block, callback);
 
   while (!is_completed) {
     log("wait for completion...");

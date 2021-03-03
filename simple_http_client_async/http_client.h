@@ -22,7 +22,7 @@ class http_client {
   using callback_t = std::function<void(const boost::system::error_code&,
                                         const http_response)>;
 
-  void get_async(const std::string& path, const header_block_t& header_block,
+  void async_get(const std::string& path, const header_block_t& header_block,
                  callback_t callback);
 
  private:

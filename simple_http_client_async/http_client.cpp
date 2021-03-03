@@ -203,7 +203,7 @@ http_client::~http_client() {
   }
 }
 
-void http_client::get_async(const std::string& path,
+void http_client::async_get(const std::string& path,
                             const header_block_t& header_block,
                             callback_t callback) {
   auto copied_header_block{header_block};
