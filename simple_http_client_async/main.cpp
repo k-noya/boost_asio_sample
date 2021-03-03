@@ -17,9 +17,9 @@ int main() {
                                          const boost::system::error_code& error,
                                          const http_response response) {
     if (error) {
-      std::cerr << error;
+      log(error);
     } else {
-      std::cout << response;
+      log(response);
     }
 
     is_completed = true;

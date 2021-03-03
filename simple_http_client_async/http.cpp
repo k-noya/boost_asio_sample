@@ -52,6 +52,7 @@ header_block_t parse(const std::string& header_block_str) {
 }
 
 std::ostream& operator<<(std::ostream& out, const http_response& response) {
+  out << '\n';
   out << "[status line]\n";
   out << response.m_status_line << '\n';
   out << '\n';
