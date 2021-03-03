@@ -33,21 +33,19 @@ std::string serialize(const http_request& request) {
 header_block_t parse(const std::string& header_block_str) {
   std::vector<std::string> header_lines;
   boost::algorithm::split(header_lines, header_block_str,
-                          boost::is_any_of(NEW_LINE));
+                          boost::is_any_of(NEW_LINE),
+                          boost::algorithm::token_compress_on);
 
   header_block_t header_block;
   std::for_each(
       header_lines.begin(), header_lines.end(),
       [&header_block](const auto header) {
-        if (header.empty()) {
-          return;
-        }
-
-        std::vector<std::string> header_elements;
-        boost::algorithm::split(header_elements, header, boost::is_any_of(":"));
-        header_block.insert(
-            {boost::algorithm::trim_right_copy(header_elements.at(0)),
-             boost::algorithm::trim_left_copy(header_elements.at(1))});
+        const auto index = header.find_first_of(':');
+        const auto header_name =
+            boost::algorithm::trim_right_copy(header.substr(0, index));
+        const auto header_value =
+            boost::algorithm::trim_left_copy(header.substr(index + 1));
+        header_block.insert({header_name, header_value});
       });
 
   return header_block;
