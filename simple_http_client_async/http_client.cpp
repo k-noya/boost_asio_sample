@@ -24,15 +24,17 @@ using asio_socket = boost::asio::ip::tcp::socket;
 using socket_ptr = std::shared_ptr<asio_socket>;
 
 struct transaction_context {
-  transaction_context(socket_ptr socket,
+  transaction_context(socket_ptr socket, const std::string& serialized_request,
                       const http_client::callback_t& completion_callback)
       : m_socket{socket},
         m_response{},
         m_read_buffer{},
+        m_write_buffer{serialized_request},
         m_completion_callback{completion_callback} {};
   socket_ptr m_socket;
   http_response m_response;
   std::string m_read_buffer;
+  std::string m_write_buffer;
   http_client::callback_t m_completion_callback;
 };
 
@@ -80,11 +82,12 @@ void on_send_request(const boost::system::error_code& error,
                                      std::size_t bytes_transferred) {
     on_receive_status_line(error, bytes_transferred, txn_context);
   };
+
+  auto response_buffer =
+      boost::asio::dynamic_buffer(txn_context->m_read_buffer);
   const auto delimiter = NEW_LINE;
-  boost::asio::async_read_until(
-      *txn_context->m_socket,
-      boost::asio::dynamic_buffer(txn_context->m_read_buffer), delimiter,
-      handler);
+  boost::asio::async_read_until(*txn_context->m_socket, response_buffer,
+                                delimiter, handler);
 
   return;
 }
@@ -107,11 +110,12 @@ void on_receive_status_line(const boost::system::error_code& error,
                                      std::size_t bytes_transferred) {
     on_receive_response_header(error, bytes_transferred, txn_context);
   };
+
+  auto response_buffer =
+      boost::asio::dynamic_buffer(txn_context->m_read_buffer);
   const auto delimiter = NEW_LINE + NEW_LINE;
-  boost::asio::async_read_until(
-      *txn_context->m_socket,
-      boost::asio::dynamic_buffer(txn_context->m_read_buffer), delimiter,
-      handler);
+  boost::asio::async_read_until(*txn_context->m_socket, response_buffer,
+                                delimiter, handler);
 
   return;
 }
@@ -146,16 +150,18 @@ void on_receive_response_header(const boost::system::error_code& error,
     return;
   }
 
-  const auto remain_length =
-      content_length - txn_context->m_read_buffer.length();
   const auto handler = [txn_context](const boost::system::error_code& error,
                                      std::size_t bytes_transferred) {
     on_receive_response_body(error, bytes_transferred, txn_context);
   };
-  boost::asio::async_read(
-      *txn_context->m_socket,
-      boost::asio::dynamic_buffer(txn_context->m_read_buffer),
-      boost::asio::transfer_exactly(remain_length), handler);
+
+  const auto remain_length =
+      content_length - txn_context->m_read_buffer.length();
+  auto response_buffer =
+      boost::asio::dynamic_buffer(txn_context->m_read_buffer);
+  boost::asio::async_read(*txn_context->m_socket, response_buffer,
+                          boost::asio::transfer_exactly(remain_length),
+                          handler);
 
   return;
 }
@@ -206,21 +212,26 @@ http_client::~http_client() {
 void http_client::async_get(const std::string& path,
                             const header_block_t& header_block,
                             callback_t callback) {
+  const auto request_line{"GET " + path + " HTTP/1.1"};
   auto copied_header_block{header_block};
   copied_header_block.emplace("Host", m_hostname);
-  const http_request request{"GET " + path + " HTTP/1.1", copied_header_block,
-                             ""};
+  const auto body{""};
+
+  const http_request request{request_line, copied_header_block, body};
   const auto serialized_request = serialize(request);
 
-  auto txn_context = std::make_shared<transaction_context>(m_socket, callback);
+  auto txn_context = std::make_shared<transaction_context>(
+      m_socket, serialized_request, callback);
+
   const auto handler = [txn_context](const boost::system::error_code& error,
                                      std::size_t bytes_transferred) {
     on_send_request(error, bytes_transferred, txn_context);
   };
-  boost::asio::async_write(*m_socket,
-                           boost::asio::buffer(serialized_request.c_str(),
-                                               serialized_request.length()),
-                           handler);
+
+  const auto request_buffer =
+      boost::asio::buffer(txn_context->m_write_buffer.c_str(),
+                          txn_context->m_write_buffer.length());
+  boost::asio::async_write(*m_socket, request_buffer, handler);
 
   return;
 }
