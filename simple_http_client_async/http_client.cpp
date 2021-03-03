@@ -15,6 +15,7 @@
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/algorithm/string/split.hpp"
 #include "boost/asio.hpp"
+#include "boost/format.hpp"
 #include "simple_http_client_async/http.h"
 #include "simple_http_client_async/log.h"
 
@@ -205,7 +206,8 @@ http_client::~http_client() {
     m_executor_work_guard.reset();
     m_future_work.get();
   } catch (const std::exception& e) {
-    std::cerr << e.what();
+    const auto message = boost::format("throw in ~http_client: %1%") % e.what();
+    log(message);
   }
 }
 
