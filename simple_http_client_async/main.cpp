@@ -15,7 +15,7 @@ int main() {
   bool is_completed{false};
   http_client::callback_t callback = [&is_completed](
                                          const boost::system::error_code& error,
-                                         const http_response response) {
+                                         const http_response& response) {
     if (error) {
       log(error);
     } else {
@@ -28,6 +28,7 @@ int main() {
   std::string hostname{"httpbin.org"};
   uint16_t port{80u};
   http_client client{hostname, port};
+
   header_block_t header_block{{"Accept", "application/json"}};
   client.async_get("/headers", header_block, callback);
 
