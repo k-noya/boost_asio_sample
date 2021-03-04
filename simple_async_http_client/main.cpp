@@ -7,9 +7,9 @@
 #include <thread>
 
 #include "boost/system/error_code.hpp"
-#include "simple_http_client_async/http.h"
-#include "simple_http_client_async/http_client.h"
-#include "simple_http_client_async/log.h"
+#include "simple_async_http_client/http.h"
+#include "simple_async_http_client/http_client.h"
+#include "simple_async_http_client/log.h"
 
 int main() {
   bool is_completed{false};

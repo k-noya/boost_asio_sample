@@ -12,7 +12,7 @@
 #include <unordered_map>
 
 #include "boost/asio.hpp"
-#include "simple_http_client_async/http.h"
+#include "simple_async_http_client/http.h"
 
 class http_client {
  public:

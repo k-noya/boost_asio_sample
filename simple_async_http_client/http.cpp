@@ -1,7 +1,7 @@
 // Copyright (c) 2021, k-noya
 // Distributed under the BSD 3-Clause License.
 // See accompanying file LICENSE
-#include "simple_http_client_async/http.h"
+#include "simple_async_http_client/http.h"
 
 #include <algorithm>
 #include <ostream>
