@@ -1,8 +1,8 @@
 // Copyright (c) 2021, k-noya
 // Distributed under the BSD 3-Clause License.
 // See accompanying file LICENSE
-#ifndef SIMPLE_HTTP_CLIENT_ASYNC_HTTP_CLIENT_H_
-#define SIMPLE_HTTP_CLIENT_ASYNC_HTTP_CLIENT_H_
+#ifndef SIMPLE_ASYNC_HTTP_CLIENT_HTTP_CLIENT_H_
+#define SIMPLE_ASYNC_HTTP_CLIENT_HTTP_CLIENT_H_
 
 #include <cstdint>
 #include <functional>
@@ -35,4 +35,4 @@ class http_client {
   std::shared_ptr<boost::asio::ip::tcp::socket> m_socket;
 };
 
-#endif  // SIMPLE_HTTP_CLIENT_ASYNC_HTTP_CLIENT_H_
+#endif  // SIMPLE_ASYNC_HTTP_CLIENT_HTTP_CLIENT_H_

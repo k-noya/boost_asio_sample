@@ -1,8 +1,8 @@
 // Copyright (c) 2021, k-noya
 // Distributed under the BSD 3-Clause License.
 // See accompanying file LICENSE
-#ifndef SIMPLE_HTTP_CLIENT_ASYNC_LOG_H_
-#define SIMPLE_HTTP_CLIENT_ASYNC_LOG_H_
+#ifndef SIMPLE_ASYNC_HTTP_CLIENT_LOG_H_
+#define SIMPLE_ASYNC_HTTP_CLIENT_LOG_H_
 
 #include <iostream>
 #include <string>
@@ -15,4 +15,4 @@ void log(const T& message) {
   std::cout << message << '\n';
 }
 
-#endif  // SIMPLE_HTTP_CLIENT_ASYNC_LOG_H_
+#endif  // SIMPLE_ASYNC_HTTP_CLIENT_LOG_H_

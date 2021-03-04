@@ -1,8 +1,8 @@
 // Copyright (c) 2021, k-noya
 // Distributed under the BSD 3-Clause License.
 // See accompanying file LICENSE
-#ifndef SIMPLE_HTTP_CLIENT_ASYNC_HTTP_H_
-#define SIMPLE_HTTP_CLIENT_ASYNC_HTTP_H_
+#ifndef SIMPLE_ASYNC_HTTP_CLIENT_HTTP_H_
+#define SIMPLE_ASYNC_HTTP_CLIENT_HTTP_H_
 
 #include <cstdint>
 #include <map>
@@ -39,4 +39,4 @@ struct http_response {
 header_block_t parse(const std::string& header_block_str);
 std::ostream& operator<<(std::ostream& out, const http_response& resopnse);
 
-#endif  // SIMPLE_HTTP_CLIENT_ASYNC_HTTP_H_
+#endif  // SIMPLE_ASYNC_HTTP_CLIENT_HTTP_H_
