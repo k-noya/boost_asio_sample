@@ -26,7 +26,7 @@ using socket_ptr = std::shared_ptr<asio_socket>;
 
 struct transaction_context {
   transaction_context(socket_ptr socket, const std::string& serialized_request,
-                      const http_client::callback_t& completion_callback)
+                      const http_client::callback_type& completion_callback)
       : m_socket{socket},
         m_response{},
         m_read_buffer{},
@@ -36,7 +36,7 @@ struct transaction_context {
   http_response m_response;
   std::string m_read_buffer;
   std::string m_write_buffer;
-  http_client::callback_t m_completion_callback;
+  http_client::callback_type m_completion_callback;
 };
 
 using transaction_context_ptr = std::shared_ptr<transaction_context>;
@@ -216,7 +216,7 @@ http_client::~http_client() {
 
 void http_client::async_get(const std::string& path,
                             const header_block_t& header_block,
-                            callback_t callback) {
+                            callback_type callback) {
   const auto request_line{"GET " + path + " HTTP/1.1"};
   auto copied_header_block{header_block};
   copied_header_block.emplace("Host", m_hostname);

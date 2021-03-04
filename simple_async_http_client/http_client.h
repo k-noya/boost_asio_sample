@@ -19,11 +19,11 @@ class http_client {
   http_client(const std::string& hostname, const uint16_t port);
   ~http_client();
 
-  using callback_t = std::function<void(const boost::system::error_code&,
-                                        const http_response&)>;
+  using callback_type = std::function<void(const boost::system::error_code&,
+                                           const http_response&)>;
 
   void async_get(const std::string& path, const header_block_t& header_block,
-                 callback_t callback);
+                 callback_type callback);
 
  private:
   boost::asio::io_context m_io_context;

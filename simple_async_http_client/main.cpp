@@ -13,17 +13,17 @@
 
 int main() {
   bool is_completed{false};
-  http_client::callback_t callback = [&is_completed](
-                                         const boost::system::error_code& error,
-                                         const http_response& response) {
-    if (error) {
-      log(error);
-    } else {
-      log(response);
-    }
+  http_client::callback_type callback =
+      [&is_completed](const boost::system::error_code& error,
+                      const http_response& response) {
+        if (error) {
+          log(error);
+        } else {
+          log(response);
+        }
 
-    is_completed = true;
-  };
+        is_completed = true;
+      };
 
   std::string hostname{"httpbin.org"};
   uint16_t port{80u};
