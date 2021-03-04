@@ -29,7 +29,7 @@ class http_client {
   boost::asio::io_context m_io_context;
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
       m_executor_work_guard;
-  std::future<void> m_future_work;
+  std::future<void> m_future_event_loop;
 
   std::string m_hostname;
   std::shared_ptr<boost::asio::ip::tcp::socket> m_socket;

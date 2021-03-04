@@ -41,6 +41,16 @@ struct transaction_context {
 
 using transaction_context_ptr = std::shared_ptr<transaction_context>;
 
+std::future<void> run_event_loop(boost::asio::io_context* io_context) {
+  const auto event_loop_work = [io_context]() {
+    log("start event loop");
+    io_context->run();
+    log("finish event loop");
+  };
+
+  return std::async(std::launch::async, event_loop_work);
+}
+
 socket_ptr construct_connected_socket(boost::asio::io_context* io_context,
                                       const std::string& hostname,
                                       const uint16_t port) {
@@ -190,21 +200,14 @@ void on_receive_response_body(const boost::system::error_code& error,
 http_client::http_client(const std::string& hostname, const uint16_t port)
     : m_io_context{},
       m_executor_work_guard{m_io_context.get_executor()},
-      m_future_work{},
+      m_future_event_loop{run_event_loop(&m_io_context)},
       m_hostname{hostname},
-      m_socket{construct_connected_socket(&m_io_context, hostname, port)} {
-  const auto event_loop_work = [this]() {
-    log("start event loop");
-    m_io_context.run();
-    log("finish event loop");
-  };
-  m_future_work = std::async(std::launch::async, event_loop_work);
-}
+      m_socket{construct_connected_socket(&m_io_context, hostname, port)} {}
 
 http_client::~http_client() {
   try {
     m_executor_work_guard.reset();
-    m_future_work.get();
+    m_future_event_loop.get();
   } catch (const std::exception& e) {
     const auto message = boost::format("throw in ~http_client: %1%") % e.what();
     log(message);
