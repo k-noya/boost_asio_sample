@@ -19,6 +19,7 @@ using header_t = std::pair<std::string, std::string>;
 using header_block_t = std::map<std::string, std::string>;
 
 const auto NEW_LINE = std::string{"\r\n"};
+const auto HEADER_BLOCK_DELIMITER = NEW_LINE + NEW_LINE;
 
 // HTTP request
 struct http_request {

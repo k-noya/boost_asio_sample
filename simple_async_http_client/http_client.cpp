@@ -87,7 +87,7 @@ void on_send_request(const boost::system::error_code& error,
 
   log("succeed to request");
 
-  txn_context->m_read_buffer.clear();
+  txn_context->m_write_buffer.clear();
 
   const auto handler = [txn_context](const boost::system::error_code& error,
                                      std::size_t bytes_transferred) {
@@ -124,9 +124,8 @@ void on_receive_status_line(const boost::system::error_code& error,
 
   auto response_buffer =
       boost::asio::dynamic_buffer(txn_context->m_read_buffer);
-  const auto delimiter = NEW_LINE + NEW_LINE;
   boost::asio::async_read_until(*txn_context->m_socket, response_buffer,
-                                delimiter, handler);
+                                HEADER_BLOCK_DELIMITER, handler);
 
   return;
 }
@@ -141,9 +140,8 @@ void on_receive_response_header(const boost::system::error_code& error,
 
   log("succeed to read header_block");
 
-  const auto delimiter = NEW_LINE + NEW_LINE;
   const auto header_block_str = txn_context->m_read_buffer.substr(
-      0, bytes_transferred - delimiter.length());
+      0, bytes_transferred - HEADER_BLOCK_DELIMITER.length());
   txn_context->m_read_buffer.erase(0, bytes_transferred);
 
   auto& header_block = txn_context->m_response.m_header_block;
