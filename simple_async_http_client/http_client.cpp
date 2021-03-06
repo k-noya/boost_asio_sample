@@ -22,6 +22,9 @@
 
 namespace {
 
+//
+// Utility for boost::asio::ip::tcp::socket
+//
 using asio_socket = boost::asio::ip::tcp::socket;
 using asio_socket_ptr = std::shared_ptr<asio_socket>;
 
@@ -30,6 +33,34 @@ asio_socket_ptr make_asio_socket(Args&&... args) {
   return std::make_shared<asio_socket>(std::forward<Args>(args)...);
 }
 
+asio_socket_ptr construct_connected_socket(boost::asio::io_context* io_context,
+                                           const std::string& hostname,
+                                           const uint16_t port) {
+  boost::asio::ip::tcp::resolver resolver{*io_context};
+  const auto results = resolver.resolve(hostname, std::to_string(port));
+  const auto remote_endpoint = results.begin()->endpoint();
+
+  auto socket = make_asio_socket(*io_context);
+  socket->connect(remote_endpoint);
+  return socket;
+}
+
+//
+// Utility for boost::asio::io_context
+//
+std::future<void> run_event_loop(boost::asio::io_context* io_context) {
+  const auto event_loop_work = [io_context]() {
+    log("start event loop");
+    io_context->run();
+    log("finish event loop");
+  };
+
+  return std::async(std::launch::async, event_loop_work);
+}
+
+//
+// Utility for HTTP request/response
+//
 struct transaction_context {
   transaction_context(asio_socket_ptr socket,
                       const std::string& serialized_request,
@@ -53,29 +84,9 @@ transaction_context_ptr make_transaction_context(Args&&... args) {
   return std::make_shared<transaction_context>(std::forward<Args>(args)...);
 }
 
-std::future<void> run_event_loop(boost::asio::io_context* io_context) {
-  const auto event_loop_work = [io_context]() {
-    log("start event loop");
-    io_context->run();
-    log("finish event loop");
-  };
-
-  return std::async(std::launch::async, event_loop_work);
-}
-
-asio_socket_ptr construct_connected_socket(boost::asio::io_context* io_context,
-                                           const std::string& hostname,
-                                           const uint16_t port) {
-  boost::asio::ip::tcp::resolver resolver{*io_context};
-  const auto results = resolver.resolve(hostname, std::to_string(port));
-  const auto remote_endpoint = results.begin()->endpoint();
-
-  auto socket = make_asio_socket(*io_context);
-  socket->connect(remote_endpoint);
-  return socket;
-}
-
-// Callback handler
+//
+// Callback handlers
+//
 void on_send_request(const boost::system::error_code& error,
                      std::size_t bytes_transferred,
                      transaction_context_ptr txn_context);
