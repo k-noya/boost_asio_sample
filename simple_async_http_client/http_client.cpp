@@ -10,6 +10,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "boost/algorithm/string/classification.hpp"
@@ -22,17 +23,23 @@
 namespace {
 
 using asio_socket = boost::asio::ip::tcp::socket;
-using socket_ptr = std::shared_ptr<asio_socket>;
+using asio_socket_ptr = std::shared_ptr<asio_socket>;
+
+template <typename... Args>
+asio_socket_ptr make_asio_socket(Args&&... args) {
+  return std::make_shared<asio_socket>(std::forward<Args>(args)...);
+}
 
 struct transaction_context {
-  transaction_context(socket_ptr socket, const std::string& serialized_request,
+  transaction_context(asio_socket_ptr socket,
+                      const std::string& serialized_request,
                       const http_client::callback_type& completion_callback)
       : m_socket{socket},
         m_response{},
         m_read_buffer{},
         m_write_buffer{serialized_request},
         m_completion_callback{completion_callback} {};
-  socket_ptr m_socket;
+  asio_socket_ptr m_socket;
   http_response m_response;
   std::string m_read_buffer;
   std::string m_write_buffer;
@@ -40,6 +47,11 @@ struct transaction_context {
 };
 
 using transaction_context_ptr = std::shared_ptr<transaction_context>;
+
+template <typename... Args>
+transaction_context_ptr make_transaction_context(Args&&... args) {
+  return std::make_shared<transaction_context>(std::forward<Args>(args)...);
+}
 
 std::future<void> run_event_loop(boost::asio::io_context* io_context) {
   const auto event_loop_work = [io_context]() {
@@ -51,14 +63,14 @@ std::future<void> run_event_loop(boost::asio::io_context* io_context) {
   return std::async(std::launch::async, event_loop_work);
 }
 
-socket_ptr construct_connected_socket(boost::asio::io_context* io_context,
-                                      const std::string& hostname,
-                                      const uint16_t port) {
+asio_socket_ptr construct_connected_socket(boost::asio::io_context* io_context,
+                                           const std::string& hostname,
+                                           const uint16_t port) {
   boost::asio::ip::tcp::resolver resolver{*io_context};
   const auto results = resolver.resolve(hostname, std::to_string(port));
   const auto remote_endpoint = results.begin()->endpoint();
 
-  socket_ptr socket = std::make_shared<asio_socket>(*io_context);
+  auto socket = make_asio_socket(*io_context);
   socket->connect(remote_endpoint);
   return socket;
 }
@@ -223,8 +235,8 @@ void http_client::async_get(const std::string& path,
   const http_request request{request_line, copied_header_block, body};
   const auto serialized_request = serialize(request);
 
-  auto txn_context = std::make_shared<transaction_context>(
-      m_socket, serialized_request, callback);
+  auto txn_context =
+      make_transaction_context(m_socket, serialized_request, callback);
 
   const auto handler = [txn_context](const boost::system::error_code& error,
                                      std::size_t bytes_transferred) {
