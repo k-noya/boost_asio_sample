@@ -230,8 +230,7 @@ http_client::~http_client() {
     m_executor_work_guard.reset();
     m_future_event_loop.get();
   } catch (const std::exception& e) {
-    const auto message = boost::format("throw in ~http_client: %1%") % e.what();
-    log(message);
+    log("exception has been thrown in ~http_client: %1%", e.what());
   }
 }
 
