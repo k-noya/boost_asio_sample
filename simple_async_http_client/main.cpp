@@ -12,6 +12,8 @@
 #include "simple_async_http_client/log.h"
 
 int main() {
+  log("start main");
+
   bool is_completed{false};
   http_client::callback_type callback =
       [&is_completed](const boost::system::error_code& error,
@@ -36,6 +38,8 @@ int main() {
     log("wait for completion...");
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
+
+  log("finish main");
 
   return 0;
 }
